@@ -838,7 +838,8 @@ class EmulatorJS {
                         if (isoFile === null && ["iso", "cso", "chd", "elf"].includes(ext)) {
                             isoFile = fileName;
                         }
-                        if (["cue", "ccd", "toc", "m3u"].includes(ext)) {
+                        //only a sheet the core can open: a dump may hold a .ccd next to its .cue
+                        if (["cue", "ccd", "toc", "m3u"].includes(ext) && supportsExt(ext)) {
                             if (this.getCore(true) === "psx") {
                                 //always prefer m3u files for psx cores
                                 if (selectedCueExt !== "m3u") {
@@ -848,12 +849,11 @@ class EmulatorJS {
                                     }
                                 }
                             } else {
-                                //prefer cue or ccd files over toc or m3u
-                                if (!["cue", "ccd"].includes(selectedCueExt)) {
-                                    if (cueFile === null || ["cue", "ccd"].includes(ext)) {
-                                        cueFile = fileName;
-                                        selectedCueExt = ext;
-                                    }
+                                //prefer cue, then ccd, over toc or m3u
+                                const sheetOrder = ["cue", "ccd", "toc", "m3u"];
+                                if (cueFile === null || sheetOrder.indexOf(ext) < sheetOrder.indexOf(selectedCueExt)) {
+                                    cueFile = fileName;
+                                    selectedCueExt = ext;
                                 }
                             }
                         }

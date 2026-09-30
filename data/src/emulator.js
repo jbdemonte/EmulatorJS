@@ -4324,6 +4324,9 @@ class EmulatorJS {
         }
     }
     menuOptionChanged(option, value) {
+        // Building the disks menu selects the disk the core already has, before
+        // the settings exist and before the core is ready to switch disks.
+        if (option === "disk" && !this.started) return;
         this.saveSettings();
         this.allSettings[option] = value;
         if (this.debug) console.log(option, value);

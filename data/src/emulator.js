@@ -1139,9 +1139,11 @@ class EmulatorJS {
         this.gamepad = new GamepadHandler(); //https://github.com/ethanaobrien/Gamepad
         this.gamepad.on("connected", (e) => {
             if (!this.gamepadLabels) return;
+            const key = this.gamepadKey(e.gamepadIndex);
+            if (key === null || this.gamepadSelection.includes(key)) return;
             for (let i = 0; i < this.gamepadSelection.length; i++) {
                 if (this.gamepadSelection[i] === "") {
-                    this.gamepadSelection[i] = this.gamepad.gamepads[e.gamepadIndex].id + "_" + this.gamepad.gamepads[e.gamepadIndex].index;
+                    this.gamepadSelection[i] = key;
                     break;
                 }
             }
@@ -1172,6 +1174,12 @@ class EmulatorJS {
         if (typeof this.config.gameId !== "number" || !this.config.netplayUrl || this.netplayEnabled === false) {
             this.elements.bottomBar.netplay[0].style.display = "none";
         }
+    }
+    // A gamepad's index is the browser's (navigator.getGamepads), which may
+    // leave gaps: it is not its position in this.gamepad.gamepads.
+    gamepadKey(gamepadIndex) {
+        const gamepad = this.gamepad.gamepads.find(g => g && g.index === gamepadIndex);
+        return gamepad ? gamepad.id + "_" + gamepad.index : null;
     }
     updateGamepadLabels() {
         for (let i = 0; i < this.gamepadLabels.length; i++) {
@@ -3349,7 +3357,7 @@ class EmulatorJS {
     }
     gamepadEvent(e) {
         if (!this.started) return;
-        const gamepadIndex = this.gamepadSelection.indexOf(this.gamepad.gamepads[e.gamepadIndex].id + "_" + this.gamepad.gamepads[e.gamepadIndex].index);
+        const gamepadIndex = this.gamepadSelection.indexOf(this.gamepadKey(e.gamepadIndex));
         if (gamepadIndex < 0) {
             return; // Gamepad not set anywhere
         }

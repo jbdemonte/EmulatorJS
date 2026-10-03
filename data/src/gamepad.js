@@ -23,8 +23,10 @@ class GamepadHandler {
         };
         this.gamepads = [];
         this.listeners = {};
-        this.timeout = null;
-        this.loop();
+        // First poll on the next tick, once the caller has registered its
+        // listeners: a pad already active at load would otherwise be found
+        // before anyone listens for "connected", and never bound to a player.
+        this.timeout = setTimeout(this.loop.bind(this), 0);
     }
     terminate() {
         window.clearTimeout(this.timeout);
